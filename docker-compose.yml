@@ -101,6 +101,21 @@ services:
     depends_on:
       - prometheus
 
+  # ── k6 (Testes de Carga) ─────────────────────────
+  k6:
+    image: grafana/k6
+    container_name: k6
+    volumes:
+      - ./tests/k6:/scripts
+    command: run /scripts/load-test.js
+    depends_on:
+      - api-service
+      - auth-service
+    networks:
+      - app-net
+    profiles:
+      - testing
+
 volumes:
   mongo_data:
   grafana_data:
