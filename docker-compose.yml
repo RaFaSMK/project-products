@@ -1,0 +1,64 @@
+version: '3.9'
+
+services:
+  # ── MongoDB ──────────────────────────────────────
+  mongodb:
+    image: mongo:7
+    container_name: mongodb
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-net
+    restart: unless-stopped
+
+  # ── Auth Service ─────────────────────────────────
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - '${AUTH_PORT:-3001}:3001'
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - AUTH_PORT=3001
+      - AUTH_MONGO_URI=${AUTH_MONGO_URI:-mongodb://mongodb:27017/auth-db}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-24h}
+      - THROTTLE_TTL=${THROTTLE_TTL:-60}
+      - THROTTLE_LIMIT=${THROTTLE_LIMIT:-30}
+    depends_on:
+      - mongodb
+    networks:
+      - app-net
+    restart: unless-stopped
+
+  # ── API Service ──────────────────────────────────
+  api-service:
+    build:
+      context: ./api-service
+      dockerfile: Dockerfile
+    container_name: api-service
+    ports:
+      - '${API_PORT:-3000}:3000'
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - API_PORT=3000
+      - API_MONGO_URI=${API_MONGO_URI:-mongodb://mongodb:27017/api-db}
+      - JWT_SECRET=${JWT_SECRET}
+      - THROTTLE_TTL=${THROTTLE_TTL:-60}
+      - THROTTLE_LIMIT=${THROTTLE_LIMIT:-30}
+    depends_on:
+      - mongodb
+    networks:
+      - app-net
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+
+networks:
+  app-net:
+    driver: bridge
