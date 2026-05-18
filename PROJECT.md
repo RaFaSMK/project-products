@@ -231,33 +231,33 @@ GRAFANA_ADMIN_PASSWORD=admin123
 
 ### Fase 0 — Setup do Projeto
 
-- [ ] Criar repositório Git (`git init`, `.gitignore`, `README.md`)
-- [ ] Criar `.env.example` com todas as variáveis
-- [ ] Criar `docker-compose.yml` base (MongoDB + redes)
-- [ ] Inicializar `auth-service` com NestJS CLI: `nest new auth-service`
-- [ ] Inicializar `api-service` com NestJS CLI: `nest new api-service`
-- [ ] Criar `Dockerfile` para cada serviço (multi-stage recomendado)
+- [x] Criar repositório Git (`git init`, `.gitignore`, `README.md`)
+- [x] Criar `.env.example` com todas as variáveis
+- [x] Criar `docker-compose.yml` base (MongoDB + redes)
+- [x] Inicializar `auth-service` com NestJS CLI: `nest new auth-service`
+- [x] Inicializar `api-service` com NestJS CLI: `nest new api-service`
+- [x] Criar `Dockerfile` para cada serviço (multi-stage recomendado)
 - [ ] Testar `docker-compose up --build` — todos os containers sobem sem erro
 
 ---
 
 ### Fase 1 — Auth Service
 
-- [ ] Instalar dependências de auth:
+- [x] Instalar dependências de auth:
   ```bash
   npm i @nestjs/jwt @nestjs/passport passport passport-jwt bcryptjs
   npm i -D @types/passport-jwt @types/bcryptjs
   ```
-- [ ] Criar `User` schema com Mongoose (campos: name, email, password, role, isActive)
-- [ ] Criar `UsersModule` + `UsersService` (findByEmail, create)
-- [ ] Criar `AuthModule` com `JwtModule.register()`
-- [ ] Criar `POST /auth/register` com DTO validado (`class-validator`)
-- [ ] Criar `POST /auth/login` → retorna `{ access_token, user }`
-- [ ] Criar `GET /auth/me` protegido por `JwtAuthGuard`
-- [ ] Criar `JwtStrategy` (passport) + `JwtAuthGuard`
-- [ ] Criar `RolesGuard` + decorator `@Roles('admin')`
-- [ ] Hash de senha com bcrypt (salt rounds = 12) antes de salvar
-- [ ] Configurar Swagger no `main.ts` do auth-service:
+- [x] Criar `User` schema com Mongoose (campos: name, email, password, role, isActive)
+- [x] Criar `UsersModule` + `UsersService` (findByEmail, create)
+- [x] Criar `AuthModule` com `JwtModule.register()`
+- [x] Criar `POST /auth/register` com DTO validado (`class-validator`)
+- [x] Criar `POST /auth/login` → retorna `{ access_token, user }`
+- [x] Criar `GET /auth/me` protegido por `JwtAuthGuard`
+- [x] Criar `JwtStrategy` (passport) + `JwtAuthGuard`
+- [x] Criar `RolesGuard` + decorator `@Roles('admin')`
+- [x] Hash de senha com bcrypt (salt rounds = 12) antes de salvar
+- [x] Configurar Swagger no `main.ts` do auth-service:
   ```ts
   const config = new DocumentBuilder()
     .setTitle('Auth Service')
@@ -265,24 +265,24 @@ GRAFANA_ADMIN_PASSWORD=admin123
     .addBearerAuth()
     .build();
   ```
-- [ ] Anotar todos os DTOs e controller com decorators do `@nestjs/swagger`
+- [x] Anotar todos os DTOs e controller com decorators do `@nestjs/swagger`
 - [ ] Validar funcionamento via Swagger UI em `http://localhost:3001/api-docs`
 
 ---
 
 ### Fase 2 — API Service (CRUD Principal)
 
-- [ ] Instalar dependências:
+- [x] Instalar dependências:
   ```bash
   npm i @nestjs/mongoose mongoose @nestjs/jwt @nestjs/passport passport passport-jwt
   npm i class-validator class-transformer
   npm i -D @types/passport-jwt
   ```
-- [ ] Copiar `JwtAuthGuard` + `RolesGuard` + `RolesDecorator` do auth-service para `common/`
-- [ ] Configurar `JwtStrategy` no api-service (mesma `JWT_SECRET`)
-- [ ] Criar `Product` schema (campos: name, description, price, category, stock, isDeleted, deletedAt, createdBy, timestamps)
-- [ ] Criar `ProductsModule` + `ProductsController` + `ProductsService`
-- [ ] Implementar rotas:
+- [x] Copiar `JwtAuthGuard` + `RolesGuard` + `RolesDecorator` do auth-service para `common/`
+- [x] Configurar `JwtStrategy` no api-service (mesma `JWT_SECRET`)
+- [x] Criar `Product` schema (campos: name, description, price, category, stock, isDeleted, deletedAt, createdBy, timestamps)
+- [x] Criar `ProductsModule` + `ProductsController` + `ProductsService`
+- [x] Implementar rotas:
 
   | Método   | Rota                          | Guard              |
   |----------|-------------------------------|--------------------|
@@ -295,63 +295,63 @@ GRAFANA_ADMIN_PASSWORD=admin123
   | `PATCH`  | `/products/:id/restore`       | `JwtAuthGuard` + `Roles('admin')` |
   | `GET`    | `/products/deleted`           | `JwtAuthGuard` + `Roles('admin')` |
 
-- [ ] Implementar **soft delete**: `DELETE` seta `isDeleted: true` + `deletedAt: new Date()`
-- [ ] Implementar **restore**: `PATCH /:id/restore` seta `isDeleted: false`, limpa `deletedAt`
-- [ ] Implementar **busca por ID** (`findById` + erro 404 customizado)
-- [ ] Implementar **busca por nome** (query param `?name=x`, usar `$regex` + `$options: 'i'`)
-- [ ] Implementar **paginação**: query params `?page=1&limit=10`
-- [ ] Implementar **filtros**: `?category=x&minPrice=10&maxPrice=200`
-- [ ] Implementar **ordenação**: `?sort=price&order=asc`
-- [ ] Todas as queries devem incluir `{ isDeleted: false }` por padrão
-- [ ] Criar `QueryProductDto` com `@ApiPropertyOptional` para todos os params
-- [ ] Configurar `ValidationPipe` global no `main.ts`:
+- [x] Implementar **soft delete**: `DELETE` seta `isDeleted: true` + `deletedAt: new Date()`
+- [x] Implementar **restore**: `PATCH /:id/restore` seta `isDeleted: false`, limpa `deletedAt`
+- [x] Implementar **busca por ID** (`findById` + erro 404 customizado)
+- [x] Implementar **busca por nome** (query param `?name=x`, usar `$regex` + `$options: 'i'`)
+- [x] Implementar **paginação**: query params `?page=1&limit=10`
+- [x] Implementar **filtros**: `?category=x&minPrice=10&maxPrice=200`
+- [x] Implementar **ordenação**: `?sort=price&order=asc`
+- [x] Todas as queries devem incluir `{ isDeleted: false }` por padrão
+- [x] Criar `QueryProductDto` com `@ApiPropertyOptional` para todos os params
+- [x] Configurar `ValidationPipe` global no `main.ts`:
   ```ts
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   ```
-- [ ] Configurar Swagger no `main.ts` do api-service
+- [x] Configurar Swagger no `main.ts` do api-service
 - [ ] Testar todas as rotas via Swagger UI em `http://localhost:3000/api-docs`
 
 ---
 
 ### Fase 3 — Segurança
 
-- [ ] Instalar:
+- [x] Instalar:
   ```bash
   npm i helmet @nestjs/throttler
   ```
-- [ ] Adicionar `helmet()` no `main.ts` de ambos os serviços
-- [ ] Configurar `ThrottlerModule` no `AppModule` (TTL e limite via env)
-- [ ] Adicionar `ThrottlerGuard` globalmente
-- [ ] Configurar CORS no `main.ts`:
+- [x] Adicionar `helmet()` no `main.ts` de ambos os serviços
+- [x] Configurar `ThrottlerModule` no `AppModule` (TTL e limite via env)
+- [x] Adicionar `ThrottlerGuard` globalmente
+- [x] Configurar CORS no `main.ts`:
   ```ts
   app.enableCors({ origin: process.env.CORS_ORIGIN || '*' });
   ```
-- [ ] Criar `HttpExceptionFilter` global para padronizar erros:
+- [x] Criar `HttpExceptionFilter` global para padronizar erros:
   ```json
   { "success": false, "statusCode": 404, "error": "...", "message": "..." }
   ```
-- [ ] Garantir que senhas **nunca** aparecem nas respostas (usar `@Exclude()` no schema)
+- [x] Garantir que senhas **nunca** aparecem nas respostas (usar `select: false` no schema)
 - [ ] Validar que rotas de admin retornam `403` para role `user`
 
 ---
 
 ### Fase 4 — Health Check & Métricas (Observabilidade)
 
-- [ ] Instalar:
+- [x] Instalar:
   ```bash
   npm i prom-client @willsoto/nestjs-prometheus
   ```
-- [ ] Criar `HealthModule` em ambos os serviços
-- [ ] Implementar `GET /health`:
+- [x] Criar `HealthModule` em ambos os serviços
+- [x] Implementar `GET /health`:
   ```json
   { "status": "ok", "uptime": 3600, "mongo": "connected", "timestamp": "..." }
   ```
-- [ ] Expor `GET /metrics` no formato Prometheus (prom-client padrão)
-- [ ] Criar `MetricsInterceptor` para registrar:
+- [x] Expor `GET /metrics` no formato Prometheus (prom-client padrão)
+- [x] Criar `MetricsInterceptor` para registrar:
   - `http_requests_total` (counter por rota + método + status)
   - `http_request_duration_seconds` (histogram)
-- [ ] Aplicar `MetricsInterceptor` globalmente no `AppModule`
-- [ ] Configurar `observability/prometheus.yml`:
+- [x] Aplicar `MetricsInterceptor` globalmente no `AppModule`
+- [x] Configurar `observability/prometheus.yml`:
   ```yaml
   global:
     scrape_interval: 15s
@@ -365,22 +365,22 @@ GRAFANA_ADMIN_PASSWORD=admin123
         - targets: ['auth-service:3001']
       metrics_path: '/metrics'
   ```
-- [ ] Adicionar Prometheus e Grafana no `docker-compose.yml`
+- [x] Adicionar Prometheus e Grafana no `docker-compose.yml`
 - [ ] Verificar scrape funcionando em `http://localhost:9090/targets`
-- [ ] Criar dashboard Grafana com pelo menos 4 painéis:
-  - [ ] Requests por segundo
-  - [ ] Latência p95
-  - [ ] Taxa de erros
-  - [ ] Uso de memória Node.js
+- [x] Criar dashboard Grafana com pelo menos 4 painéis:
+  - [x] Requests por segundo
+  - [x] Latência p95
+  - [x] Taxa de erros
+  - [x] Uso de memória Node.js
 
 ---
 
 ### Fase 5 — Testes de Carga (k6)
 
-- [ ] Criar `tests/k6/smoke-test.js` (1 VU, 30s)
-- [ ] Criar `tests/k6/load-test.js` (rampa até 50 VUs, 5min)
-- [ ] Criar `tests/k6/stress-test.js` (rampa até 200 VUs)
-- [ ] Adicionar serviço `k6` no `docker-compose.yml`:
+- [x] Criar `tests/k6/smoke-test.js` (1 VU, 30s)
+- [x] Criar `tests/k6/load-test.js` (rampa até 50 VUs, 5min)
+- [x] Criar `tests/k6/stress-test.js` (rampa até 200 VUs)
+- [x] Adicionar serviço `k6` no `docker-compose.yml`:
   ```yaml
   k6:
     image: grafana/k6
@@ -391,7 +391,7 @@ GRAFANA_ADMIN_PASSWORD=admin123
     networks: [app-net]
     profiles: [testing]   # só sobe com --profile testing
   ```
-- [ ] Definir thresholds mínimos no script:
+- [x] Definir thresholds mínimos no script:
   - `http_req_duration: ['p(95)<500']`
   - `http_req_failed: ['rate<0.01']`
 - [ ] Executar e salvar screenshot dos resultados para os slides
@@ -401,8 +401,8 @@ GRAFANA_ADMIN_PASSWORD=admin123
 
 ### Fase 6 — Docker Compose Final
 
-- [ ] Garantir `depends_on` com `condition: service_healthy` para MongoDB
-- [ ] Adicionar `healthcheck` no container MongoDB:
+- [x] Garantir `depends_on` com `condition: service_healthy` para MongoDB
+- [x] Adicionar `healthcheck` no container MongoDB:
   ```yaml
   healthcheck:
     test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
@@ -410,8 +410,8 @@ GRAFANA_ADMIN_PASSWORD=admin123
     timeout: 5s
     retries: 5
   ```
-- [ ] Usar `restart: unless-stopped` em todos os serviços de produção
-- [ ] Verificar que volumes persistem dados entre restarts (`mongo_data`, `grafana_data`)
+- [x] Usar `restart: unless-stopped` em todos os serviços de produção
+- [x] Verificar que volumes persistem dados entre restarts (`mongo_data`, `grafana_data`)
 - [ ] Testar `docker-compose down -v && docker-compose up --build` do zero
 
 ---
