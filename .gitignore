@@ -1,6 +1,7 @@
 # ── Dependências ────────────────────────────────
 node_modules/
 package-lock.json
+!/auth-service/package-lock.json
 
 # ── Build ───────────────────────────────────────
 dist/

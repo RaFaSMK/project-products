@@ -1,11 +1,13 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { loginAdmin } from './auth.js';
 
 // ── Smoke Test: 1 VU, 30 segundos ──────────────────
 export const options = {
   vus: 1,
   duration: '30s',
   thresholds: {
+    checks: ['rate==1'],
     http_req_duration: ['p(95)<500'],
     http_req_failed: ['rate<0.01'],
   },
@@ -14,22 +16,23 @@ export const options = {
 const BASE_URL = 'http://api-service:3000';
 const AUTH_URL = 'http://auth-service:3001';
 
-export default function () {
-  // 1. Registrar usuário (pode falhar se já existe — ok)
-  const uniqueId = `${__VU}_${__ITER}_${Date.now()}`;
+export function setup() {
+  const adminToken = loginAdmin(AUTH_URL);
+  // O cadastro público cria apenas uma conta comum.
+  const uniqueId = Date.now();
   const registerRes = http.post(
     `${AUTH_URL}/auth/register`,
     JSON.stringify({
       name: `Smoke User ${uniqueId}`,
       email: `smoke_${uniqueId}@test.com`,
       password: 'SenhaForte@123',
-      role: 'admin',
     }),
     { headers: { 'Content-Type': 'application/json' } },
   );
 
   check(registerRes, {
     'register status 201': (r) => r.status === 201,
+    'register creates user role': (r) => r.json().data?.role === 'user',
   });
 
   // 2. Login
@@ -47,10 +50,24 @@ export default function () {
     'login has token': (r) => JSON.parse(r.body).access_token !== undefined,
   });
 
-  const token = JSON.parse(loginRes.body).access_token;
+  const userToken = JSON.parse(loginRes.body).access_token;
+  const denied = http.post(
+    `${BASE_URL}/products`,
+    JSON.stringify({ name: 'Forbidden', price: 1, category: 'teste', stock: 1 }),
+    {
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${userToken}` },
+      responseCallback: http.expectedStatuses(403),
+    },
+  );
+  check(denied, { 'ordinary user cannot create products': (r) => r.status === 403 });
+  return { token: adminToken };
+}
+
+export default function (data) {
+  const uniqueId = `${__VU}_${__ITER}_${Date.now()}`;
   const authHeaders = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${data.token}`,
   };
 
   // 3. Criar produto

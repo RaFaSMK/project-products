@@ -55,7 +55,7 @@ A documentação detalhada dos endpoints interativos está disponível via **Swa
 ### Principais Rotas
 
 **Auth Service:**
-- `POST /auth/register` — Cria um novo usuário.
+- `POST /auth/register` — Cria um usuário comum (`user`). O papel é definido pelo servidor; um campo `role` enviado pelo cliente é ignorado.
 - `POST /auth/login` — Autentica e retorna o JWT.
 - `GET /auth/me` — Retorna dados do usuário autenticado.
 
@@ -85,15 +85,52 @@ A saúde e a performance das aplicações podem ser monitoradas em tempo real.
 
 O projeto possui scripts avançados para testes de carga. Eles rodam isolados usando um profile específico do Docker Compose.
 
+Os scripts usam uma conta administrativa previamente autorizada **em um ambiente
+isolado de testes**. Eles não criam administradores pelo cadastro público.
+Cadastre a conta de teste normalmente e conceda seu papel pelo processo de
+administração do banco de teste. Por exemplo, usando um e-mail fictício já
+cadastrado, execute no `mongosh` do banco `auth-db` de testes:
+
+```javascript
+db.users.updateOne(
+  { email: 'admin.teste@example.com' },
+  { $set: { role: 'admin' } },
+);
+```
+
+Não existe endpoint público de promoção de privilégios. Depois da concessão,
+os scripts fazem novo login para receber o papel atualizado no JWT.
+Defina `TEST_ADMIN_EMAIL` e `TEST_ADMIN_PASSWORD` no terminal e repasse essas
+variáveis ao contêiner, sem colocar senhas no código ou no histórico de comandos.
+
 Para executar os testes, utilize os comandos abaixo com os containers já rodando:
 
 ```bash
 # Teste de Fumaça (Smoke Test - Básico)
-docker-compose run --rm k6 run /scripts/smoke-test.js
+docker-compose run --rm -e TEST_ADMIN_EMAIL -e TEST_ADMIN_PASSWORD k6 run /scripts/smoke-test.js
 
 # Teste de Carga Normal (Load Test - Rampa até 50 usuários)
-docker-compose run --rm k6 run /scripts/load-test.js
+docker-compose run --rm -e TEST_ADMIN_EMAIL -e TEST_ADMIN_PASSWORD k6 run /scripts/load-test.js
 
 # Teste de Estresse (Stress Test - Rampa até 200 usuários)
-docker-compose run --rm k6 run /scripts/stress-test.js
+docker-compose run --rm -e TEST_ADMIN_EMAIL -e TEST_ADMIN_PASSWORD k6 run /scripts/stress-test.js
 ```
+
+## Testes de regressão da autenticação
+
+```bash
+cd auth-service
+npm ci
+npm test
+npm run build
+```
+
+A suíte verifica o cadastro público, tentativa de escolher `admin`, login, papel
+no JWT, autorização de rotas, respostas sem hash de senha e validação de entrada.
+O serviço de persistência é simulado; os controllers, validação, autenticação JWT
+e guards usados nesses testes são reais. Não é necessário MongoDB ou Docker para
+essa suíte. O workflow `Auth service regression tests` executa os testes e o build.
+
+Contas criadas antes da correção não são modificadas automaticamente. Em uma
+instalação existente, revise concessões administrativas anteriores; tokens já
+emitidos preservam seus claims até expirar ou serem invalidados pela operação.

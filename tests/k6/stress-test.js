@@ -1,5 +1,6 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { loginAdmin } from './auth.js';
 
 // ── Stress Test: rampa até 200 VUs ──────────────────
 export const options = {
@@ -21,29 +22,7 @@ const BASE_URL = 'http://api-service:3000';
 const AUTH_URL = 'http://auth-service:3001';
 
 export function setup() {
-  const uniqueId = Date.now();
-
-  http.post(
-    `${AUTH_URL}/auth/register`,
-    JSON.stringify({
-      name: 'Stress Test Admin',
-      email: `stresstest_admin_${uniqueId}@test.com`,
-      password: 'SenhaForte@123',
-      role: 'admin',
-    }),
-    { headers: { 'Content-Type': 'application/json' } },
-  );
-
-  const loginRes = http.post(
-    `${AUTH_URL}/auth/login`,
-    JSON.stringify({
-      email: `stresstest_admin_${uniqueId}@test.com`,
-      password: 'SenhaForte@123',
-    }),
-    { headers: { 'Content-Type': 'application/json' } },
-  );
-
-  const token = JSON.parse(loginRes.body).access_token;
+  const token = loginAdmin(AUTH_URL);
 
   // Criar produtos de teste
   for (let i = 0; i < 50; i++) {

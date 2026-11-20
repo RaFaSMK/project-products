@@ -1,5 +1,6 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
+import { loginAdmin } from './auth.js';
 
 // ── Load Test: rampa até 50 VUs, 5 minutos ──────────
 export const options = {
@@ -18,33 +19,9 @@ export const options = {
 const BASE_URL = 'http://api-service:3000';
 const AUTH_URL = 'http://auth-service:3001';
 
-// Setup: registrar e logar um admin antes do teste
+// Setup: autenticar uma conta admin previamente autorizada no ambiente de teste.
 export function setup() {
-  const uniqueId = Date.now();
-
-  // Registrar admin
-  http.post(
-    `${AUTH_URL}/auth/register`,
-    JSON.stringify({
-      name: 'Load Test Admin',
-      email: `loadtest_admin_${uniqueId}@test.com`,
-      password: 'SenhaForte@123',
-      role: 'admin',
-    }),
-    { headers: { 'Content-Type': 'application/json' } },
-  );
-
-  // Login
-  const loginRes = http.post(
-    `${AUTH_URL}/auth/login`,
-    JSON.stringify({
-      email: `loadtest_admin_${uniqueId}@test.com`,
-      password: 'SenhaForte@123',
-    }),
-    { headers: { 'Content-Type': 'application/json' } },
-  );
-
-  const token = JSON.parse(loginRes.body).access_token;
+  const token = loginAdmin(AUTH_URL);
 
   // Criar alguns produtos iniciais
   for (let i = 0; i < 20; i++) {

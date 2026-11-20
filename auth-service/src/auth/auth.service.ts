@@ -17,7 +17,8 @@ export class AuthService {
       name: registerDto.name,
       email: registerDto.email,
       password: registerDto.password,
-      role: registerDto.role,
+      // Public registration never grants privileges, even without an HTTP pipe.
+      role: 'user',
     });
 
     // Retorna sem a senha
